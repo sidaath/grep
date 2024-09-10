@@ -7,6 +7,17 @@ static bool MatchPattern(string inputLine, string pattern)
     {
         return inputLine.Contains(pattern);
     }
+    else if (pattern == @"\d")
+    {
+        foreach(char character in inputLine)
+        {
+            if (character >= '0' && character <='9')
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     else
     {
         throw new ArgumentException($"Unhandled pattern: {pattern}");
