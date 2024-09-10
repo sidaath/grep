@@ -18,10 +18,35 @@ static bool MatchPattern(string inputLine, string pattern)
         }
         return false;
     }
+    else if (pattern == @"\w")
+    {
+        foreach(char character in inputLine)
+        {
+            if (IsAlpha(character)) return true;
+        }
+        return false;
+    }
     else
     {
         throw new ArgumentException($"Unhandled pattern: {pattern}");
     }
+}
+
+static bool IsAlpha(char character)
+{
+    if(character >= 'a' && character<='z')
+    {
+        return true;
+    }
+    if(character >='A' && character<='Z')
+    {
+        return true;
+    }
+    if(character == '_')
+    {
+        return true;
+    }
+    return false;
 }
 
 if (args[0] != "-E")
