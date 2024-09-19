@@ -28,7 +28,13 @@ static bool MatchPattern(string inputLine, string pattern)
     }
     else if(pattern.StartsWith('[') && pattern.EndsWith(']'))
     {
-        return MatchPositiveGroup(pattern, inputLine);
+        if(pattern[1] == '^')
+        {
+            return MatchNegativeGroup(pattern, inputLine);
+        }else
+        {
+            return MatchPositiveGroup(pattern, inputLine);
+        }
     }
     else
     {
@@ -66,6 +72,23 @@ static bool MatchPositiveGroup(string pattern, string line)
     foreach(char character in line)
     {
         if(collector.ContainsKey(character)) return true;
+    }
+    return false;
+}
+
+static bool MatchNegativeGroup(string pattern, string line)
+{
+    Dictionary<char, int> collector = [];
+    foreach(char character in pattern)
+    {
+        if (IsAlpha(character))
+        {
+            collector[character] = 0;
+        }
+    }
+    foreach(char character in line)
+    {
+        if (!collector.ContainsKey(character)) return true;
     }
     return false;
 }
