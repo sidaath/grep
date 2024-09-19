@@ -9,22 +9,11 @@ static bool MatchPattern(string inputLine, string pattern)
     }
     else if (pattern == @"\d")
     {
-        foreach(char character in inputLine)
-        {
-            if (character >= '0' && character <='9')
-            {
-                return true;
-            }
-        }
-        return false;
+        return MatchDigit(inputLine);
     }
     else if (pattern == @"\w")
     {
-        foreach(char character in inputLine)
-        {
-            if (IsAlpha(character)) return true;
-        }
-        return false;
+        return MatchAlpha(inputLine);
     }
     else if(pattern.StartsWith('[') && pattern.EndsWith(']'))
     {
@@ -40,6 +29,27 @@ static bool MatchPattern(string inputLine, string pattern)
     {
         throw new ArgumentException($"Unhandled pattern: {pattern}");
     }
+}
+
+static bool MatchDigit(string input)
+{
+    foreach(char character in input)
+    {
+        if (character >= '0' && character <='9')
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool MatchAlpha(string input)
+{
+    foreach(char character in input)
+    {
+        if (IsAlpha(character)) return true;
+    }
+    return false;
 }
 
 static bool IsAlpha(char character)
