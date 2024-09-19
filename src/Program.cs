@@ -26,6 +26,10 @@ static bool MatchPattern(string inputLine, string pattern)
         }
         return false;
     }
+    else if(pattern.StartsWith('[') && pattern.EndsWith(']'))
+    {
+        return MatchPositiveGroup(pattern, inputLine);
+    }
     else
     {
         throw new ArgumentException($"Unhandled pattern: {pattern}");
@@ -45,6 +49,23 @@ static bool IsAlpha(char character)
     if(character == '_')
     {
         return true;
+    }
+    return false;
+}
+
+static bool MatchPositiveGroup(string pattern, string line)
+{
+    Dictionary<char, int> collector = [];
+    foreach (char character in pattern)
+    {
+        if (IsAlpha(character))
+        {
+            collector[character] = 0;
+        }
+    }
+    foreach(char character in line)
+    {
+        if(collector.ContainsKey(character)) return true;
     }
     return false;
 }
