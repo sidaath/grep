@@ -36,6 +36,19 @@ static bool MatchPattern(string inputLine, string pattern)
         }
         return false;
     }
+    else if(pattern.EndsWith('$'))
+    {
+        List<string> formattedPattern = FormatPattern(pattern[..^1]);
+
+        int patternLen = pattern.Length - 1;
+        int startIndexForMatching = inputLine.Length - patternLen;
+
+        if(MatchSubstring([.. formattedPattern], inputLine[startIndexForMatching..]))
+        {
+            return true;
+        }
+        return false;
+    }
     else
     {
         List<string> formattedPattern = FormatPattern(pattern);
