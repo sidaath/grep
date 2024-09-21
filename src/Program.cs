@@ -26,6 +26,16 @@ static bool MatchPattern(string inputLine, string pattern)
             return MatchPositiveGroup(pattern, inputLine);
         }
     }
+    else if(pattern.StartsWith('^'))
+    {
+        List<string> formattedPattern = FormatPattern(pattern[1..]);
+
+        if(MatchSubstring([.. formattedPattern], inputLine[..(pattern.Length - 1)]))
+        {
+            return true;
+        }
+        return false;
+    }
     else
     {
         List<string> formattedPattern = FormatPattern(pattern);
