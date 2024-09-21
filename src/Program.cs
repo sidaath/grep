@@ -188,10 +188,6 @@ static List<string> FormatPattern(string rawPattern)
         }
     }
 
-    foreach(string s in formattedPattern)
-    {
-        Console.WriteLine("s = "+s);
-    }
     return formattedPattern;
 
 }
