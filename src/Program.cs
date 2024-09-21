@@ -213,7 +213,10 @@ static bool MatchSubstring(string[] pattern, string line)
                         }
                     }else
                     {
-                        if (letter != line[lineIndex].ToString()) return false;
+                        if (letter != line[lineIndex].ToString())
+                        {
+                            return false;
+                        }
                         lineIndex += 1;
                     }
                     break;
