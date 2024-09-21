@@ -53,11 +53,17 @@ static bool MatchPattern(string inputLine, string pattern)
     {
         List<string> formattedPattern = FormatPattern(pattern);
         bool repeatingPattern = false;
-        
+        bool wildCard = false;
 
         foreach(char c in pattern)
         {
-            if(c == '+' || c == '?') repeatingPattern = true;
+            if(c == '+' || c == '?') 
+            {
+                repeatingPattern = true;
+            }else if(c == '.')
+            {
+                wildCard = true;
+            }
         }
         
         for(int i = 0; i < inputLine.Length; i++)
@@ -65,7 +71,7 @@ static bool MatchPattern(string inputLine, string pattern)
             if( inputLine.Length - i < formattedPattern.Count && !repeatingPattern)
             {
                 return false;
-            }else if(!repeatingPattern && MatchSubstring([.. formattedPattern], inputLine.Substring(i, formattedPattern.Count)))
+            }else if(!repeatingPattern && !wildCard && MatchSubstring([.. formattedPattern], inputLine.Substring(i, formattedPattern.Count)))
             {
                 return true;
             }else if(MatchSubstring([.. formattedPattern], inputLine[i..]))
@@ -169,7 +175,10 @@ static List<string> FormatPattern(string rawPattern)
             }
         }else if(!skipCharacter)
         {
-            if(i+1 < rawPattern.Length && rawPattern[i+1] == '+')
+            if(rawPattern[i] == '.')
+            {
+                formattedPattern.Add(rawPattern.Substring(i,1));
+            }else if(i+1 < rawPattern.Length && rawPattern[i+1] == '+')
             {
                 formattedPattern.Add(rawPattern.Substring(i,2));
                 skipCharacter = true;
@@ -207,6 +216,10 @@ static bool MatchSubstring(string[] pattern, string line)
                 
                 case @"\w":
                     if(!MatchAlpha(line[lineIndex].ToString())) return false;
+                    lineIndex += 1;
+                    break;
+                
+                case ".":
                     lineIndex += 1;
                     break;
 
