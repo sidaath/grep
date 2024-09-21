@@ -171,8 +171,13 @@ static List<string> FormatPattern(string rawPattern)
             if(i+1 < rawPattern.Length && rawPattern[i+1] == '+')
             {
                 formattedPattern.Add(rawPattern.Substring(i,2));
-                skipCharacter = true;    
-            }else
+                skipCharacter = true;
+            }else if(i+1 < rawPattern.Length && rawPattern[i+1] == '?')
+            {
+                formattedPattern.Add(rawPattern.Substring(i,2));
+                skipCharacter = true;
+            }
+            else
             {
                 formattedPattern.Add(rawPattern.Substring(i,1));
             }            
@@ -182,6 +187,10 @@ static List<string> FormatPattern(string rawPattern)
         }
     }
 
+    foreach(string s in formattedPattern)
+    {
+        Console.WriteLine("s = "+s);
+    }
     return formattedPattern;
 
 }
