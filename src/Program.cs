@@ -53,10 +53,11 @@ static bool MatchPattern(string inputLine, string pattern)
     {
         List<string> formattedPattern = FormatPattern(pattern);
         bool repeatingPattern = false;
+        
 
         foreach(char c in pattern)
         {
-            if(c == '+') repeatingPattern = true;
+            if(c == '+' || c == '?') repeatingPattern = true;
         }
         
         for(int i = 0; i < inputLine.Length; i++)
@@ -67,7 +68,7 @@ static bool MatchPattern(string inputLine, string pattern)
             }else if(!repeatingPattern && MatchSubstring([.. formattedPattern], inputLine.Substring(i, formattedPattern.Count)))
             {
                 return true;
-            }else if(MatchSubstring([.. formattedPattern], inputLine))
+            }else if(MatchSubstring([.. formattedPattern], inputLine[i..]))
             {
                 return true;
             }
@@ -216,11 +217,19 @@ static bool MatchSubstring(string[] pattern, string line)
                 default:
                     if (letter.Length > 1 && letter[1] == '+')
                     {
+                        if(line[lineIndex] != letter[0]) return false;
                         while(lineIndex < line.Length && line[lineIndex] == letter[0])
                         {
                             lineIndex += 1;
                         }
-                    }else
+                    }else if(letter.Length > 1 && letter[1] == '?')
+                    {
+                        if(line[lineIndex] == letter[0])
+                        {
+                            lineIndex += 1;
+                        }
+                    }
+                    else
                     {
                         if (letter != line[lineIndex].ToString())
                         {
