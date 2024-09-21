@@ -52,13 +52,22 @@ static bool MatchPattern(string inputLine, string pattern)
     else
     {
         List<string> formattedPattern = FormatPattern(pattern);
+        bool repeatingPattern = false;
+
+        foreach(char c in pattern)
+        {
+            if(c == '+') repeatingPattern = true;
+        }
         
         for(int i = 0; i < inputLine.Length; i++)
         {
-            if( inputLine.Length - i < formattedPattern.Count)
+            if( inputLine.Length - i < formattedPattern.Count && !repeatingPattern)
             {
                 return false;
-            }else if(MatchSubstring([.. formattedPattern], inputLine.Substring(i, formattedPattern.Count)))
+            }else if(!repeatingPattern && MatchSubstring([.. formattedPattern], inputLine.Substring(i, formattedPattern.Count)))
+            {
+                return true;
+            }else if(MatchSubstring([.. formattedPattern], inputLine))
             {
                 return true;
             }
@@ -145,7 +154,6 @@ static List<string> FormatPattern(string rawPattern)
     List<string> formattedPattern = [];
     bool skipCharacter = false;
 
-    //a+bc
     for (int i =0; i < rawPattern.Length; i++)
     {
         if (rawPattern[i] == '\\')
@@ -197,8 +205,17 @@ static bool MatchSubstring(string[] pattern, string line)
                     break;
 
                 default:
-                    if (letter != line[lineIndex].ToString()) return false;
-                    lineIndex += 1;
+                    if (letter.Length > 1 && letter[1] == '+')
+                    {
+                        while(lineIndex < line.Length && line[lineIndex] == letter[0])
+                        {
+                            lineIndex += 1;
+                        }
+                    }else
+                    {
+                        if (letter != line[lineIndex].ToString()) return false;
+                        lineIndex += 1;
+                    }
                     break;
             }
         }
