@@ -145,6 +145,7 @@ static List<string> FormatPattern(string rawPattern)
     List<string> formattedPattern = [];
     bool skipCharacter = false;
 
+    //a+bc
     for (int i =0; i < rawPattern.Length; i++)
     {
         if (rawPattern[i] == '\\')
@@ -159,7 +160,14 @@ static List<string> FormatPattern(string rawPattern)
             }
         }else if(!skipCharacter)
         {
-            formattedPattern.Add(rawPattern.Substring(i,1));
+            if(i+1 < rawPattern.Length && rawPattern[i+1] == '+')
+            {
+                formattedPattern.Add(rawPattern.Substring(i,2));
+                skipCharacter = true;    
+            }else
+            {
+                formattedPattern.Add(rawPattern.Substring(i,1));
+            }            
         }else
         {
             skipCharacter = false;
@@ -172,21 +180,25 @@ static List<string> FormatPattern(string rawPattern)
 
 static bool MatchSubstring(string[] pattern, string line)
 {
+    int lineIndex = 0;
     for(int i = 0; i <pattern.Length; i++)
         {
             string letter = pattern[i];
             switch (letter)
             {
                 case @"\d":
-                    if (!MatchDigit(line[i].ToString())) return false;
+                    if (!MatchDigit(line[lineIndex].ToString())) return false;
+                    lineIndex += 1;
                     break;
                 
                 case @"\w":
-                    if(!MatchAlpha(line[i].ToString())) return false;
+                    if(!MatchAlpha(line[lineIndex].ToString())) return false;
+                    lineIndex += 1;
                     break;
 
                 default:
-                    if (letter != line[i].ToString()) return false;
+                    if (letter != line[lineIndex].ToString()) return false;
+                    lineIndex += 1;
                     break;
             }
         }
