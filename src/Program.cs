@@ -69,6 +69,10 @@ static bool MatchPattern(string inputLine, string pattern)
             }
         }
         
+        //starting from inputLine, continue to match substrings of inputLine with the pattern
+        //in each iteration, check the substring of inputLine that starts with the next index
+        //IE -> MatchSubstring(pattern, inputLine[0-end]), MatchSubstring(pattern, inputLine[1-end]), MatchSubstring(pattern, inputLine[2-end]) ...
+        //if substring(i,end) is too small, return false
         for(int i = 0; i < inputLine.Length; i++)
         {
             if( inputLine.Length - i < formattedPattern.Count && !repeatingPattern)
@@ -261,83 +265,101 @@ static bool MatchSubstring(string[] pattern, string line)
 static bool MatchAlternatives(string pattern, string line)
 {
     int lineIndex = 0;
-        int patternIndex = 0;
-        bool inOption = false;
+    int patternIndex = 0;
+    int lineIndexMem = lineIndex;
+    bool inOption = false;
 
-        while(patternIndex < pattern.Length)
+
+    //match the entire pattern against the text
+    while(patternIndex < pattern.Length)
+    {
+        if(lineIndex >= line.Length)
         {
-            if(lineIndex >= line.Length)
+            //pattern not finished, input line is finished
+            //if pattern index is inside an options collection, entire pattern could be matched if this is the last options collection
+            //send patternIndex forward to end of options list and check if patternIndex reaches end of pattern
+            if(inOption)
             {
-                //pattern not finished, input line is finished
-                if(inOption)
+                while(pattern[patternIndex] != ')')
                 {
-                    while(pattern[patternIndex] != ')')
-                    {
-                        patternIndex += 1;
-                    }
-                    if(patternIndex != pattern.Length - 1)
-                    {
-                        return false;
-                    }else
-                    {
-                        return true;
-                    }
-                }else
-                {
-                    if(patternIndex != pattern.Length - 1)
-                    {
-                        return false;
-                    }else
-                    {
-                        return true;
-                    }
-                }
-
-            }
-
-            if(line[lineIndex] == pattern[patternIndex])
-            {
-                patternIndex += 1;
-                lineIndex += 1;
-            }else if(!inOption)
-            {
-                if(pattern[patternIndex] == '(')
-                {
-                    inOption = true;
                     patternIndex += 1;
-                }else
+                }
+                if(patternIndex != pattern.Length - 1)
                 {
                     return false;
-                }
-            }else if(inOption)
-            {
-                if(pattern[patternIndex] == ')')
-                {
-                    inOption = false;
-                    patternIndex += 1;
-                }else if(pattern[patternIndex] == '|')
-                {
-                    while(pattern[patternIndex] != ')')
-                    {
-                        patternIndex += 1;
-                    }
-                    patternIndex += 1;
-                    inOption = false;
                 }else
                 {
-                    while(pattern[patternIndex] != '|')
-                    {
-                        patternIndex += 1;
-                        if(pattern[patternIndex] == ')')
-                        {
-                            return false;
-                        }
-                    }
-                    patternIndex += 1;
+                    return true;
                 }
             }
+            //if pattern index is not in an options collection, pattern is only matched if the index = last index of pattern
+            //otherwise there is a mismatch - return false
+            else
+            {
+                if(patternIndex != pattern.Length - 1)
+                {
+                    return false;
+                }else
+                {
+                    return true;
+                }
+            }
+
         }
-        return true;
+
+        if(line[lineIndex] == pattern[patternIndex])
+        {
+            patternIndex += 1;
+            lineIndex += 1;
+        }else if(!inOption)
+        {
+            if(pattern[patternIndex] == '(')
+            {
+                //pattern[i] != line[i] due to starting an options block in the pattern
+                inOption = true;
+                patternIndex += 1;
+                lineIndexMem = lineIndex;
+            }else
+            {   
+                //mismatch due to lines not being the same
+                return false;
+            }
+        }else if(inOption)
+        {
+            if(pattern[patternIndex] == ')')
+            {
+                //pattern[i] != line[i] due to ending of options black
+                inOption = false;
+                patternIndex += 1;
+            }else if(pattern[patternIndex] == '|')
+            {
+                //pattern[i] != line[i] due to reaching end of one option
+                //pattern has matched up to now, send the index forward to end of the option block and check from next character in the next iteration
+                while(pattern[patternIndex] != ')')
+                {
+                    patternIndex += 1;
+                }
+                patternIndex += 1;
+                inOption = false;
+            }else
+            {
+                //pattern[i] != line[i] in one option, but could potentially match a different option
+                //if this is the final option in this block, return false
+                //otherwise backtrack lineIndex to where options begin, and check next pattern
+                while(pattern[patternIndex] != '|')
+                {
+                    patternIndex += 1;
+                    if(pattern[patternIndex] == ')')
+                    {
+                        return false;
+                    }
+                }
+                patternIndex += 1;
+                lineIndex = lineIndexMem;
+            }
+        }
+    }
+    return true;
 }
 
 if (args[0] != "-E")
