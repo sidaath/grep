@@ -48,6 +48,9 @@ static bool MatchPattern(string inputLine, string pattern)
             return true;
         }
         return false;
+    }else if(pattern.Contains('(') && pattern.Contains(')'))
+    {
+        return MatchAlternatives(pattern, inputLine);
     }
     else
     {
@@ -203,6 +206,7 @@ static List<string> FormatPattern(string rawPattern)
 
 static bool MatchSubstring(string[] pattern, string line)
 {
+    Console.WriteLine($"testing line : {line}");
     int lineIndex = 0;
     for(int i = 0; i <pattern.Length; i++)
         {
@@ -240,6 +244,8 @@ static bool MatchSubstring(string[] pattern, string line)
                     }
                     else
                     {
+                        if(lineIndex >= line.Length) return false;
+
                         if (letter != line[lineIndex].ToString())
                         {
                             return false;
@@ -250,6 +256,88 @@ static bool MatchSubstring(string[] pattern, string line)
             }
         }
         
+        return true;
+}
+
+static bool MatchAlternatives(string pattern, string line)
+{
+    int lineIndex = 0;
+        int patternIndex = 0;
+        bool inOption = false;
+
+        while(patternIndex < pattern.Length)
+        {
+            if(lineIndex >= line.Length)
+            {
+                //pattern not finished, input line is finished
+                if(inOption)
+                {
+                    while(pattern[patternIndex] != ')')
+                    {
+                        patternIndex += 1;
+                    }
+                    if(patternIndex != pattern.Length - 1)
+                    {
+                        return false;
+                    }else
+                    {
+                        return true;
+                    }
+                }else
+                {
+                    if(patternIndex != pattern.Length - 1)
+                    {
+                        return false;
+                    }else
+                    {
+                        return true;
+                    }
+                }
+
+            }
+
+            if(line[lineIndex] == pattern[patternIndex])
+            {
+                patternIndex += 1;
+                lineIndex += 1;
+            }else if(!inOption)
+            {
+                if(pattern[patternIndex] == '(')
+                {
+                    inOption = true;
+                    patternIndex += 1;
+                }else
+                {
+                    return false;
+                }
+            }else if(inOption)
+            {
+                if(pattern[patternIndex] == ')')
+                {
+                    inOption = false;
+                    patternIndex += 1;
+                }else if(pattern[patternIndex] == '|')
+                {
+                    while(pattern[patternIndex] != ')')
+                    {
+                        patternIndex += 1;
+                    }
+                    patternIndex += 1;
+                    inOption = false;
+                }else
+                {
+                    while(pattern[patternIndex] != '|')
+                    {
+                        patternIndex += 1;
+                        if(pattern[patternIndex] == ')')
+                        {
+                            return false;
+                        }
+                    }
+                    patternIndex += 1;
+                }
+            }
+        }
         return true;
 }
 
