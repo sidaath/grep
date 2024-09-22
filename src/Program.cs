@@ -206,7 +206,6 @@ static List<string> FormatPattern(string rawPattern)
 
 static bool MatchSubstring(string[] pattern, string line)
 {
-    Console.WriteLine($"testing line : {line}");
     int lineIndex = 0;
     for(int i = 0; i <pattern.Length; i++)
         {
