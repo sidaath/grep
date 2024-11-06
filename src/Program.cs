@@ -1,9 +1,11 @@
 using System;
+using System.Data.Common;
 using System.IO;
 using System.Reflection.PortableExecutable;
 
 static bool MatchPattern(string inputLine, string pattern)
 {
+    Console.WriteLine($"line = {inputLine} pat={pattern}");
     if (pattern.Length == 1)
     {
         return inputLine.Contains(pattern);
@@ -269,6 +271,11 @@ static bool MatchAlternatives(string pattern, string line)
     int lineIndexMem = lineIndex;
     bool inOption = false;
 
+    if (pattern.Contains(@"\"))
+    {
+        return MatchBackRefs(pattern, line);
+    }
+
 
     //match the entire pattern against the text
     while(patternIndex < pattern.Length)
@@ -360,6 +367,61 @@ static bool MatchAlternatives(string pattern, string line)
         }
     }
     return true;
+}
+
+static bool MatchBackRefs(string pattern, string line)
+{
+    // Console.WriteLine("in back ref");
+    string[] patternArray = pattern.Split();
+    string[] lineArray = line.Split();
+
+    string backRef = "";
+    for(int i = 0 ; i < patternArray.Length; i++)
+    {
+        string word = patternArray[i];
+        if (word.StartsWith('('))
+        {
+            backRef = word.Substring(1, word.Length-2);
+            patternArray[i] = backRef;
+            break;
+        }
+    }
+    Console.WriteLine($"bakref = {backRef}");
+    Console.WriteLine($"pattern = {pattern}");
+    Console.WriteLine($"line = {line}");
+
+    string[] lineSubArray;
+    int left = 0;
+    int right = patternArray.Length;
+
+    while (right <= lineArray.Length)
+    {
+        Console.WriteLine($"left={left} right={right}");
+        lineSubArray = lineArray[left..right];
+
+        for(int i = 0; i < patternArray.Length; i++)
+        {
+            Console.WriteLine($"I = {i} | lineSubArray[i]={lineSubArray[i]} | != patternArray[i]={patternArray[i]}");
+            string pat;
+            if(patternArray[i].Length==2 && patternArray[i]==@"\1")
+            {
+                pat = backRef;
+            }
+            else
+            {
+                pat = patternArray[i];
+            }
+
+            if(!MatchPattern(lineSubArray[i], pat))
+            {
+                left++;
+                right++;
+                break;
+            }
+            if(i==patternArray.Length-1) return true;
+        }
+    }
+    return false;
 }
 
 if (args[0] != "-E")
